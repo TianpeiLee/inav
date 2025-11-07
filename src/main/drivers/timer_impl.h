@@ -38,6 +38,31 @@
 uint8_t lookupTimerIndex(const tmr_type *tim);
 void impl_timerCaptureCompareHandler(tmr_type *tim, timHardwareContext_t * timerCtx);
 
+#elif defined(CH32H41x)
+
+#define IMPL_TIM_IT_UPDATE_INTERRUPT      TIM_IT_Update
+#define TIM_IT_CCx(chIdx)                 (TIM_IT_CC1 << (chIdx))
+
+#define _TIM_IRQ_HANDLER2(name, i, j)                                   \
+     __attribute__((interrupt("WCH-Interrupt-fast"))) \
+     void name(void)        \
+    {                                                                   \
+        impl_timerCaptureCompareHandler(TIM ## i, timerCtx[i - 1]); \
+        impl_timerCaptureCompareHandler(TIM ## j, timerCtx[j - 1]); \
+    } 
+
+#define _TIM_IRQ_HANDLER(name, i)                                       \
+    __attribute__((interrupt("WCH-Interrupt-fast"))) \
+    void name(void)      \
+    {                                                                   \
+        impl_timerCaptureCompareHandler(TIM ## i, timerCtx[i - 1]); \
+    } 
+
+uint8_t lookupTimerIndex(const TIM_TypeDef *tim);
+void impl_timerCaptureCompareHandler(TIM_TypeDef *tim, timHardwareContext_t * timerCtx);
+
+
+
 #else // end at32 
 
 #if defined(USE_HAL_DRIVER)

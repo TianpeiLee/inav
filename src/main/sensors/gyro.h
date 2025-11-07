@@ -26,7 +26,11 @@
 #include "flight/dynamic_gyro_notch.h"
 #include "flight/secondary_dynamic_gyro_notch.h"
 #if !defined(SITL_BUILD)
+#ifndef CH32H41x
 #include "arm_math.h"
+#else
+#include "riscv_math.h"
+#endif
 #else
 #include <math.h>
 #endif

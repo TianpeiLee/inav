@@ -90,6 +90,9 @@ void hard_fault_handler_c(unsigned long *hardfault_args)
 
 #else
 
+#if defined(CH32H41x)
+__FAST_INTERRUPT
+#endif
 void HardFault_Handler(void)
 {
     LED2_ON;

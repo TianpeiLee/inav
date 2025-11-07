@@ -22,8 +22,22 @@
 
 #ifdef USE_DYNAMIC_FILTERS
 
+#ifndef CH32H41x
 #include "arm_math.h"
+#else
+#include "riscv_math.h"
+
+#define arm_rfft_fast_instance_f32  riscv_rfft_fast_instance_f32
+#define arm_cfft_radix8by4_f32      riscv_cfft_radix8by4_f32
+#define arm_cfft_instance_f32       riscv_cfft_instance_f32
+#define arm_bitreversal_32          riscv_bitreversal_32
+#define arm_rfft_fast_init_f32      riscv_rfft_fast_init_f32
+#define arm_cmplx_mag_f32           riscv_cmplx_mag_f32
+#endif
 #include "common/filter.h"
+
+
+
 
 /*
  * Current code works only with 64 window size. Changing it do a different size would require

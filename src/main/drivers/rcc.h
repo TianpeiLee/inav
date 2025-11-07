@@ -5,6 +5,11 @@
 
 enum rcc_reg {
     RCC_EMPTY = 0,   // make sure that default value (0) does not enable anything
+#ifdef CH32H41x
+    RCC_HB,
+    RCC_HB2,
+    RCC_HB1
+#else
     RCC_AHB,        //0x20      
     RCC_APB2,       //0x40  CRM->apb2en
     RCC_APB1,       //0x60  CRM->apb1en end AT32 
@@ -16,6 +21,7 @@ enum rcc_reg {
     RCC_APB3,
     RCC_AHB4,
     RCC_APB4
+#endif
 };
  
 #define RCC_ENCODE(reg, mask) (((reg) << 5) | LOG2_32BIT(mask))
@@ -27,6 +33,11 @@ enum rcc_reg {
 #define RCC_AHB3(periph) RCC_ENCODE(RCC_AHB3,   CRM_AHB3_ ## periph ## _PER_MASK)
 #define RCC_APB1(periph) RCC_ENCODE(RCC_APB1, 	CRM_APB1_ ## periph ## _PER_MASK)
 #define RCC_APB2(periph) RCC_ENCODE(RCC_APB2, 	CRM_APB2_ ## periph ## _PER_MASK)
+
+#elif defined(CH32H41x)
+#define RCC_HB(periph)  RCC_ENCODE(RCC_HB,    RCC_HBPeriph_ ## periph)
+#define RCC_HB2(periph) RCC_ENCODE(RCC_HB2,   RCC_HB2Periph_ ## periph)
+#define RCC_HB1(periph) RCC_ENCODE(RCC_HB1,   RCC_HB1Periph_ ## periph)
 
 #else
 #define RCC_AHB(periph) RCC_ENCODE(RCC_AHB, RCC_AHBENR_ ## periph ## EN)

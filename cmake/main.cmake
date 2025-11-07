@@ -22,11 +22,11 @@ if(SITL)
     )
 else()
     set(MAIN_COMPILE_OPTIONS
-        -Wall
-        -Wextra
+       # -Wall
+       # -Wextra
         -Wunsafe-loop-optimizations
-        -Wdouble-promotion
-        -Wstrict-prototypes
+       # -Wdouble-promotion
+       # -Wstrict-prototypes
         -Werror=switch
     )
 endif()

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13...3.18)
+cmake_minimum_required(VERSION 3.13...3.27)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -12,14 +12,14 @@ set(TOOLS_DIR "${MAIN_DIR}/tools")
 
 option(SITL "SITL build for host system" OFF)
 
-set(TOOLCHAIN_OPTIONS none arm-none-eabi host)
+set(TOOLCHAIN_OPTIONS none riscv-wch-elf host)
 if (SITL)
     if (CMAKE_HOST_APPLE)
         set(MACOSX TRUE)
     endif()
     set(TOOLCHAIN "host" CACHE STRING "Toolchain to use. Available: ${TOOLCHAIN_OPTIONS}")
 else()
-    set(TOOLCHAIN "arm-none-eabi" CACHE STRING "Toolchain to use. Available: ${TOOLCHAIN_OPTIONS}")
+    set(TOOLCHAIN "riscv-wch-elf" CACHE STRING "Toolchain to use. Available: ${TOOLCHAIN_OPTIONS}")
 endif()
 
 set_property(CACHE TOOLCHAIN PROPERTY STRINGS ${TOOLCHAIN_OPTIONS})
@@ -32,11 +32,14 @@ endif()
 
 option(COMPILER_VERSION_CHECK "Ensure the compiler matches the expected version" ON)
 
+
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 string(SUBSTRING ${GIT_SHA1} 0 8 GIT_REV)
 
 # Load settings related functions, so the tests can use them
+option(RISCV "build for CH32H41x" ON)
+
 include(main)
 include(settings)
 
@@ -52,7 +55,7 @@ else()
 endif()
 
 
-project(INAV VERSION 9.0.0)
+project(INAV VERSION 8.0.1)
 
 
 enable_language(ASM)
@@ -89,8 +92,9 @@ if (NOT SITL)
     include(svd)
 endif()
 
-include(stm32)
-include(at32)
+#include(stm32)
+#include(at32)
+include(ch32)
 include(sitl)
 
 add_subdirectory(src)

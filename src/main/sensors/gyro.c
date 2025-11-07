@@ -143,6 +143,9 @@ STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev, gyroSensor_e gyroHard
 {
     dev->gyroAlign = ALIGN_DEFAULT;
 
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, 0xC0);
+
     switch (gyroHardware) {
     case GYRO_AUTODETECT:
         FALLTHROUGH;
@@ -203,6 +206,8 @@ STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev, gyroSensor_e gyroHard
 
 #ifdef USE_IMU_ICM42605
     case GYRO_ICM42605:
+        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+        USART_SendData(USART8, 0xC1);
         if (icm42605GyroDetect(dev)) {
             gyroHardware = GYRO_ICM42605;
             break;
@@ -221,6 +226,9 @@ STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev, gyroSensor_e gyroHard
 
 #ifdef USE_IMU_LSM6DXX
     case GYRO_LSM6DXX:
+        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+        USART_SendData(USART8, 0xC2);
+
         if (lsm6dGyroDetect(dev)) {
             gyroHardware = GYRO_LSM6DXX;
             break;
@@ -294,6 +302,9 @@ bool gyroInit(void)
 {
     memset(&gyro, 0, sizeof(gyro));
 
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, 0xB0);
+    
     // Set inertial sensor tag (for dual-gyro selection)
 #ifdef USE_DUAL_GYRO
     gyroDev[0].imuSensorToUse = gyroConfig()->gyro_to_use;
@@ -308,7 +319,8 @@ bool gyroInit(void)
         detectedSensors[SENSOR_INDEX_GYRO] = GYRO_NONE;
         return true;
     }
-
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, 0xB1);
     // Gyro is initialized
     gyro.initialized = true;
     detectedSensors[SENSOR_INDEX_GYRO] = gyroHardware;

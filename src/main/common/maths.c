@@ -26,7 +26,13 @@
 #include "platform.h"
 
 #ifdef USE_ARM_MATH
+#ifndef CH32H41x
 #include "arm_math.h"
+#endif
+#endif
+
+#if defined(CH32H41x)
+#include "riscv_math.h"
 #endif
 
 // http://lolengine.net/blog/2011/12/21/better-function-approximations
@@ -572,7 +578,7 @@ float NOINLINE calc_length_pythagorean_3D(const float firstElement, const float 
     return fast_fsqrtf(sq(firstElement) + sq(secondElement) + sq(thirdElement));
 }
 
-#ifdef SITL_BUILD
+#if defined(SITL_BUILD) || defined(CH32H41x)
 
 /**
  * @brief Floating-point vector subtraction, equivalent of CMSIS arm_sub_f32.

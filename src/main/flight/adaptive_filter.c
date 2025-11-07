@@ -28,7 +28,11 @@
 
 #include <stdlib.h>
 #include "flight/adaptive_filter.h"
+#ifndef CH32H41x
 #include "arm_math.h"
+#else
+#include "riscv_math.h"
+#endif
 #include <math.h>
 #include "common/maths.h"
 #include "common/axis.h"
@@ -64,6 +68,10 @@ STATIC_FASTRAM float maxLpf;
 
 STATIC_FASTRAM float adaptiveFilterIntegrator;
 STATIC_FASTRAM float adaptiveIntegratorTarget;
+
+#ifdef CH32H41x
+#define arm_std_f32  riscv_std_f32
+#endif
 
 /**
  * This function is called at pid rate, so has to be initialized at PID loop frequency

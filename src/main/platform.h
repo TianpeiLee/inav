@@ -78,6 +78,30 @@ typedef enum
 #define U_ID_1 (*(uint32_t*)0x1fff7a14)
 #define U_ID_2 (*(uint32_t*)0x1fff7a18)
 
+#elif defined(CH32H41x)
+#include "ch32h417.h"
+#include "ch32_debug.h"
+
+#define U_ID_0 (*(uint32_t*)0x1ffff7e8)
+#define U_ID_1 (*(uint32_t*)0x1ffff7ec)
+#define U_ID_2 (*(uint32_t*)0x1ffff7f0)
+
+// #define FLASH_CONFIG_STREAMER_BUFFER_SIZE   256     // fast program is 256bytes
+// #define FLASH_CONFIG_BUFFER_TYPE            uint32_t
+
+#define __FAST_INTERRUPT       __attribute__((interrupt("WCH-Interrupt-fast")))
+#define __NVIC_PRIO_BITS    4
+
+
+#define SET_BIT(REG, BIT)     ((REG) |= (BIT))
+#define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
+#define READ_BIT(REG, BIT)    ((REG) & (BIT))
+#define CLEAR_REG(REG)        ((REG) = (0x0))
+#define WRITE_REG(REG, VAL)   ((REG) = (VAL))
+#define READ_REG(REG)         ((REG))
+#define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+
+
 #endif
 
 #include "target/common.h"

@@ -36,6 +36,13 @@ timeMs_t millis(void);
 
 uint32_t ticks(void);
 
+#if defined(CH32H41x)
+uint32_t __get_MCYCLE(void);
+void __set_MCYCLE(uint32_t value);
+void __set_MCOUNT_INHIBIT(uint32_t value);
+uint32_t __get_MCOUNT_INHIBIT(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

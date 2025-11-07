@@ -34,6 +34,13 @@ doc_files=(
 	'Board - Sparky.md'
 	'Board - RMDO.md'
 	'Board - SPRacingF3.md'
+	'Development.md'
+	'Development - Building in Linux.md'
+	'Development - Bitmap.md'
+	'Development - Blackbox Internals.md'
+	'Development - Bitmap.md'
+	'Development - Cmake usage.md'
+	'Development - serial_printf_debugging.md'
 )
 
 if which gimli >/dev/null; then

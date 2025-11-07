@@ -4086,6 +4086,15 @@ static void cliStatus(char *cmdline)
     cliPrintLinef("  ABH    = %d MHz", clocks.ahb_freq  / 1000000);
     cliPrintLinef("  ABP1   = %d MHz", clocks.apb1_freq / 1000000);
     cliPrintLinef("  ABP2   = %d MHz", clocks.apb2_freq / 1000000);
+#elif defined(CH32H41x)
+    cliPrintLine("CH32 system clocks:");
+    RCC_ClocksTypeDef clocks;
+    RCC_GetClocksFreq(&clocks);   
+    
+    cliPrintLinef("  SYSCLK  = %d MHz", clocks.SYSCLK_Frequency  / 1000000);
+    cliPrintLinef("  HCLK    = %d MHz", clocks.HCLK_Frequency    / 1000000);
+    cliPrintLinef("  CoreCLK = %d MHz", clocks.Core_Frequency  / 1000000);
+    cliPrintLinef("  ADCCLK  = %d MHz", clocks.ADCCLK_Frequency  / 1000000);
 #else
     cliPrintLine("STM32 system clocks:");
 #if defined(USE_HAL_DRIVER)

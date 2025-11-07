@@ -1,0 +1,1 @@
+target_ch32h41x_xEU6(AIRBOTH4)

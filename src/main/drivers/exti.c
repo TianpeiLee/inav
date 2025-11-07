@@ -18,10 +18,17 @@ typedef struct {
 
 extiChannelRec_t extiChannelRecs[16];
 
+#if defined(CH32H41x)
+#define EXTI_IRQ_GROUPS 2
+//                                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+static const uint8_t extiGroups[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 };
+#else
 // IRQ gouping, same on 103 and 303
 #define EXTI_IRQ_GROUPS 7
 //                                      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
 static const uint8_t extiGroups[16] = { 0, 1, 2, 3, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6 };
+#endif
+
 static uint8_t extiGroupPriority[EXTI_IRQ_GROUPS];
 
 #if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)
@@ -44,6 +51,11 @@ static const uint8_t extiGroupIRQn[EXTI_IRQ_GROUPS] = {
     EXINT9_5_IRQn,
     EXINT15_10_IRQn
 };
+#elif defined(CH32H41x)
+static const uint8_t extiGroupIRQn[EXTI_IRQ_GROUPS] = {
+    EXTI7_0_IRQn,
+    EXTI15_8_IRQn  
+};
 #else
 # warning "Unknown CPU"
 #endif
@@ -56,6 +68,9 @@ static const uint8_t extiGroupIRQn[EXTI_IRQ_GROUPS] = {
 // Interrupt enable register & interrupt status register
 #define EXTI_REG_IMR (EXINT->inten)
 #define EXTI_REG_PR  (EXINT->intsts)
+#elif defined(CH32H41x)
+#define EXTI_REG_IMR (EXTI->INTENR)
+#define EXTI_REG_PR  (EXTI->INTFR)
 #else
 #define EXTI_REG_IMR (EXTI->IMR)
 #define EXTI_REG_PR  (EXTI->PR)
@@ -69,6 +84,8 @@ void EXTIInit(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 #elif defined(AT32F43x)  
     crm_periph_clock_enable(CRM_SCFG_PERIPH_CLOCK, TRUE);
+#elif defined(CH32H41x)
+    RCC_HB2PeriphClockCmd(RCC_HB2Periph_AFIO,ENABLE);
 #endif
     memset(extiChannelRecs, 0, sizeof(extiChannelRecs));
     memset(extiGroupPriority, 0xff, sizeof(extiGroupPriority));
@@ -140,6 +157,43 @@ void EXTIConfig(IO_t io, extiCallbackRec_t *cb, int irqPriority, exint_polarity_
   	    nvic_irq_enable(extiGroupIRQn[group],irqPriority,0);  
     }
 }
+#elif defined(CH32H41x)
+void EXTIConfig(IO_t io, extiCallbackRec_t *cb, int irqPriority, EXTITrigger_TypeDef trigger)
+{
+    int chIdx;
+    chIdx = IO_GPIOPinIdx(io);
+    if (chIdx < 0)
+        return;
+
+    // we have only 16 extiChannelRecs
+    ASSERT(chIdx < 16);
+
+    extiChannelRec_t *rec = &extiChannelRecs[chIdx];
+    int group = extiGroups[chIdx];
+
+    rec->handler = cb;
+
+    // SYSCFG_EXTILineConfig(IO_EXTI_PortSourceGPIO(io), IO_EXTI_PinSource(io));
+    GPIO_EXTILineConfig(IO_EXTI_PortSourceGPIO(io), IO_EXTI_PinSource(io));
+
+    uint32_t extiLine = IO_EXTI_Line(io);
+
+    EXTI_ClearITPendingBit(extiLine);
+
+    EXTI_InitTypeDef EXTIInit={0};
+    EXTIInit.EXTI_Line = extiLine;
+    EXTIInit.EXTI_Mode = EXTI_Mode_Interrupt;
+    EXTIInit.EXTI_Trigger = trigger;
+    EXTIInit.EXTI_LineCmd = ENABLE;
+    EXTI_Init(&EXTIInit);
+
+    if (extiGroupPriority[group] > irqPriority) {
+        extiGroupPriority[group] = irqPriority;
+
+        NVIC_SetPriority(extiGroupIRQn[group], irqPriority);
+        NVIC_EnableIRQ(extiGroupIRQn[group]);
+    }
+}
 #else
 void EXTIConfig(IO_t io, extiCallbackRec_t *cb, int irqPriority, EXTITrigger_TypeDef trigger)
 {
@@ -199,7 +253,7 @@ void EXTIRelease(IO_t io)
 
 void EXTIEnable(IO_t io, bool enable)
 {
-#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x)
+#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x) || defined(CH32H41x)
     uint32_t extiLine = IO_EXTI_Line(io);
     if (!extiLine)
         return;
@@ -224,14 +278,21 @@ void EXTI_IRQHandler(void)
         exti_active &= ~mask;
     }
 }
-
+#ifdef CH32H41x 
+#define _EXTI_IRQ_HANDLER(name)                 \
+__FAST_INTERRUPT  void name(void) {             \
+        EXTI_IRQHandler();                      \
+    }                                           \
+    struct dummy                                \
+    /**/
+#else
 #define _EXTI_IRQ_HANDLER(name)                 \
     void name(void) {                           \
         EXTI_IRQHandler();                      \
     }                                           \
     struct dummy                                \
     /**/
-
+#endif
 
 #if defined(AT32F43x) 
 _EXTI_IRQ_HANDLER(EXINT0_IRQHandler);
@@ -241,6 +302,9 @@ _EXTI_IRQ_HANDLER(EXINT3_IRQHandler);
 _EXTI_IRQ_HANDLER(EXINT4_IRQHandler);
 _EXTI_IRQ_HANDLER(EXINT9_5_IRQHandler);
 _EXTI_IRQ_HANDLER(EXINT15_10_IRQHandler);
+#elif defined(CH32H41x)
+_EXTI_IRQ_HANDLER(EXTI7_0_IRQHandler);
+_EXTI_IRQ_HANDLER(EXTI15_8_IRQHandler); 
 #else
 _EXTI_IRQ_HANDLER(EXTI0_IRQHandler);
 _EXTI_IRQ_HANDLER(EXTI1_IRQHandler);

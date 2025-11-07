@@ -22,7 +22,11 @@
 
 #include <string.h>
 #if !defined(SITL_BUILD)
+#ifndef CH32H41x
 #include "arm_math.h"
+#else
+#include "riscv_math.h"
+#endif
 #else
 #include <math.h>
 #endif
@@ -95,7 +99,7 @@ static void updateAxisVariance(kalman_t *kalmanState, float rate)
     kalmanState->axisMean = kalmanState->axisSumMean * kalmanState->inverseN;
     kalmanState->axisVar = kalmanState->axisSumVar * kalmanState->inverseN;
 
-#if !defined(SITL_BUILD)
+#if !defined(SITL_BUILD) && !defined(CH32H41x)
     float squirt;
     arm_sqrt_f32(kalmanState->axisVar, &squirt);
 #else

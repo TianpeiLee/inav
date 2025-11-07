@@ -64,6 +64,16 @@ void RCC_ClockCmd(rccPeriphTag_t periphTag, FunctionalState NewState)
             case RCC_APB2:
                 RCC_BIT_CMD(CRM->apb2en, mask, NewState);
                 break;
+        #elif defined(CH32H41x)
+            case RCC_HB:
+                RCC_BIT_CMD(RCC->HBPCENR, mask, NewState);
+                break;
+            case RCC_HB2:
+                RCC_BIT_CMD(RCC->HB2PCENR, mask, NewState);
+                break;
+            case RCC_HB1:
+                RCC_BIT_CMD(RCC->HB1PCENR, mask, NewState);
+                break;                        
         #else 
             #if !(defined(STM32H7) || defined(STM32G4))
             case RCC_APB1:
@@ -136,7 +146,16 @@ void RCC_ResetCmd(rccPeriphTag_t periphTag, FunctionalState NewState)
             case RCC_APB2:
                 RCC_BIT_CMD(CRM->apb2rst, mask, NewState);
                 break;
-
+        #elif defined(CH32H41x)
+            case RCC_HB:
+                RCC_BIT_CMD(RCC->HBPRSTR, mask, NewState);
+                break;
+            case RCC_HB2:
+                RCC_BIT_CMD(RCC->HB2PRSTR, mask, NewState);
+                break;
+            case RCC_HB1:
+                RCC_BIT_CMD(RCC->HB1PRSTR, mask, NewState);
+                break;                    
         #else
              #if !(defined(STM32H7) || defined(STM32G4))
                 case RCC_APB1:

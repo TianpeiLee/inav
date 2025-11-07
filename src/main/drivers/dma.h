@@ -56,6 +56,25 @@ typedef void (*dmaCallbackHandlerFuncPtr)(DMA_t channelDescriptor);
         dmamux_channel_type	     * dmaMuxref;  //dmamux flag  
     } dmaChannelDescriptor_t;
 
+#elif defined(CH32H41x)
+    #define DMA_IT_GLOB         ((uint32_t)0x00000001) // channel global interput flag
+    #define DMA_IT_TCIF         ((uint32_t)0x00000002) // channel full transport flag
+    #define DMA_IT_HTIF         ((uint32_t)0x00000004) // channel half transport flag
+    #define DMA_IT_TEIF         ((uint32_t)0x00000008) // channel transport error flag
+    
+    typedef struct dmaChannelDescriptor_s {
+        dmaTag_t                    tag;
+        DMA_TypeDef*                dma;
+        DMA_Channel_TypeDef*        ref;
+        dmaCallbackHandlerFuncPtr   irqHandlerCallback;
+        uint32_t                    flagsShift;
+        IRQn_Type                   irqNumber;
+        uint32_t                    userParam;
+        resourceOwner_e             owner;
+        uint8_t                     resourceIndex;
+        dmamux_channel_type	     * dmaMuxref;  //dmamux flag  
+    } dmaChannelDescriptor_t;
+
 #else
     #define DMA_IT_TCIF                         ((uint32_t)0x00000020)
     #define DMA_IT_HTIF                         ((uint32_t)0x00000010)
@@ -136,6 +155,30 @@ DMA_t dmaGetByRef(const dma_channel_type * ref);
 
 void dmaMuxEnable(DMA_t dma, uint32_t dmaMuxid);
 
+#elif defined(CH32H41x)
+
+#define DEFINE_DMA_CHANNEL(d, s, f) { \
+                                        .tag = DMA_TAG(d, s, 0), \
+                                        .dma = DMA##d, \
+                                        .ref = DMA##d##_Channel##s, \
+                                        .irqHandlerCallback = NULL, \
+                                        .flagsShift = f, \
+                                        .irqNumber = DMA##d##_Channel##s##_IRQn, \
+                                        .userParam = 0, \
+                                        .dmaMuxref = (dmamux_channel_type *)DMA##d ## MUX_CHANNEL ##s \
+                                    }
+
+#define DMA_HANDLER_CODE  __attribute__((interrupt("WCH-Interrupt-fast")))
+#define DEFINE_DMA_IRQ_HANDLER(d, s, i) DMA_HANDLER_CODE void DMA ## d ## _Channel ## s ## _IRQHandler(void) {\
+                                                                if (dmaDescriptors[i].irqHandlerCallback)\
+                                                                    dmaDescriptors[i].irqHandlerCallback(&dmaDescriptors[i]);\
+                                                            }
+
+#define DMA_CLEAR_FLAG(d, flag) d->dma->INTFCR = (flag << d->flagsShift)                                                           
+#define DMA_GET_FLAG_STATUS(d, flag) (d->dma->INTFR & (flag << d->flagsShift))
+
+void dmaMuxEnable(DMA_t dma, uint32_t dmaMuxid);
+DMA_t dmaGetByRef(const DMA_Channel_TypeDef * ref);
 #endif
 
 DMA_t dmaGetByTag(dmaTag_t tag);

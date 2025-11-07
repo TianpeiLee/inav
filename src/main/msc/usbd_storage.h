@@ -24,7 +24,9 @@
 #include "usbd_msc.h"
 #else
 #include "usbd_msc_mem.h"
+#if !defined(CH32H41x) 
 #include "usbd_msc_core.h"
+#endif
 #endif
 
 #ifdef USE_HAL_DRIVER

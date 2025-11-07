@@ -184,6 +184,9 @@ uint16_t timerGetPeriod(TCH_t * tch)
 {
 #if defined(AT32F43x)
     return tch->timHw->tim->pr;     //tmr pr registe
+
+#elif defined(CH32H41x)
+    return tch->timHw->tim->ATRLR;
 #else
     return tch->timHw->tim->ARR;
 #endif

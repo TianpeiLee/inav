@@ -138,7 +138,9 @@ extern uint8_t __config_end;
 #define BEEPER_PWM_FREQUENCY    2500
 #endif
 
+#ifndef CH32H41x
 #define USE_ARM_MATH // try to use FPU functions
+#endif
 
 #if defined(SITL_BUILD) || defined(UNIT_TEST)
 // This feature uses 'arm_math.h', which does not exist for x86.

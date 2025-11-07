@@ -41,7 +41,8 @@ class Compiler
             if use_host_gcc
                 bin = "g++"
             else
-                bin = "arm-none-eabi-g++"
+#                bin = "arm-none-eabi-g++"
+                bin = "riscv-wch-elf-g++"
             end
         end
         dirs.each do |dir|

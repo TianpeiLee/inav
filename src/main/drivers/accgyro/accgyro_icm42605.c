@@ -347,7 +347,6 @@ bool icm42605GyroDetect(gyroDev_t *gyro)
         busDeviceDeInit(gyro->busDev);
         return false;
     }
-
     // Magic number for ACC detection to indicate that we have detected icm42605 gyro
     mpuContextData_t * ctx = busDeviceGetScratchpadMemory(gyro->busDev);
     ctx->chipMagicNumber = 0x4265;

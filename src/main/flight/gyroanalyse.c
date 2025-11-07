@@ -131,10 +131,22 @@ void gyroDataAnalyse(gyroAnalyseState_t *state)
     gyroDataAnalyseUpdate(state);
 }
 
+#ifdef CH32H41x
+
+// #define arm_rfft_fast_instance_f32  riscv_rfft_fast_instance_f32
+// #define  arm_cfft_radix8by4_f32    riscv_cfft_radix8by4_f32
+// #define arm_cfft_instance_f32  riscv_cfft_instance_f32
+// #define arm_bitreversal_32    riscv_bitreversal_32
+
 void stage_rfft_f32(arm_rfft_fast_instance_f32 *S, float32_t *p, float32_t *pOut);
 void arm_cfft_radix8by4_f32(arm_cfft_instance_f32 *S, float32_t *p1);
 void arm_bitreversal_32(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTable);
 
+#else
+void stage_rfft_f32(arm_rfft_fast_instance_f32 *S, float32_t *p, float32_t *pOut);
+void arm_cfft_radix8by4_f32(arm_cfft_instance_f32 *S, float32_t *p1);
+void arm_bitreversal_32(uint32_t *pSrc, const uint16_t bitRevLen, const uint16_t *pBitRevTable);
+#endif
 static float computeParabolaMean(gyroAnalyseState_t *state, uint8_t peakBinIndex) {
     float preciseBin = peakBinIndex;
 

@@ -49,6 +49,7 @@ typedef struct __attribute__ ((__packed__)) lsm6DContextData_s {
 #define LSM6DSO_CHIP_ID 0x6C
 #define LSM6DSL_CHIP_ID 0x6A
 #define LSM6DS3_CHIP_ID 0x69
+#define LSM6DSV_CHIP_ID 0x70
 
 static uint8_t lsm6dID = 0x6C;
 
@@ -154,6 +155,7 @@ static bool lsm6dxxDetect(busDevice_t * dev)
         switch (tmp) {
             case LSM6DSO_CHIP_ID:
             case LSM6DSL_CHIP_ID: 
+            case LSM6DSV_CHIP_ID:
                  lsm6dID = tmp;
                 // Compatible chip detected
                 return true;
@@ -181,6 +183,28 @@ static bool lsm6dxxAccRead(accDev_t *acc)
 {
     uint8_t data[6];
     const bool ack = busReadBuf(acc->busDev, LSM6DXX_REG_OUTX_L_A, data, 6);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[0]);
+
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[1]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[2]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[3]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[4]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[5]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, 0x0D);
+
     if (!ack) {
         return false;
     }
@@ -194,6 +218,28 @@ static bool lsm6dxxGyroRead(gyroDev_t *gyro)
 {
     uint8_t data[6];
     const bool ack = busReadBuf(gyro->busDev, LSM6DXX_REG_OUTX_L_G, data, 6);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[0]);
+
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[1]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[2]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[3]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[4]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, data[5]);
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, 0x0D);
+    
     if (!ack) {
         return false;
     }
@@ -206,15 +252,26 @@ static bool lsm6dxxGyroRead(gyroDev_t *gyro)
 // Init Gyro first,then Acc
 bool lsm6dGyroDetect(gyroDev_t *gyro)
 {
+    
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET); 
+    USART_SendData(USART8, 0xD6);
+    
     gyro->busDev = busDeviceInit(BUSTYPE_SPI, DEVHW_LSM6D, gyro->imuSensorToUse, OWNER_MPU);
     if (gyro->busDev == NULL) {
+               
+        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+        USART_SendData(USART8, 0xD7);
         return false;
     }
 
     if (!lsm6dxxDetect(gyro->busDev)) {
+               while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+        USART_SendData(USART8, 0xD8);
         busDeviceDeInit(gyro->busDev);
         return false;
     }
+       while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+        USART_SendData(USART8, 0xD9);
 
     lsm6DContextData_t * ctx = busDeviceGetScratchpadMemory(gyro->busDev);
     ctx->chipMagicNumber = 0xD6;

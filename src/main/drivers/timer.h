@@ -31,7 +31,7 @@
 
 typedef uint16_t captureCompare_t;        // 16 bit on both 103 and 303, just register access must be 32bit sometimes (use timCCR_t)
 
-#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x)
+#if defined(STM32F4) || defined(STM32F7) || defined(STM32H7)|| defined(AT32F43x) || defined(CH32H41x)
 typedef uint32_t timCCR_t;
 typedef uint32_t timCCER_t;
 typedef uint32_t timSR_t;
@@ -58,6 +58,8 @@ typedef uint32_t timCNT_t;
 #define HARDWARE_TIMER_DEFINITION_COUNT 14
 #elif defined(AT32F43x)
 #define HARDWARE_TIMER_DEFINITION_COUNT 15
+#elif defined(CH32H41x)
+#define HARDWARE_TIMER_DEFINITION_COUNT 12 
 #elif defined(SITL_BUILD)
 #define HARDWARE_TIMER_DEFINITION_COUNT 0
 #else
@@ -84,6 +86,28 @@ typedef struct timerHardware_s {
     dmaTag_t dmaTag;
     uint32_t dmaMuxid; //DMAMUX ID
 } timerHardware_t;
+#elif defined(CH32H41x)
+
+typedef TIM_TypeDef HAL_Timer_t;
+typedef struct timerDef_s {
+    HAL_Timer_t * tim;
+    rccPeriphTag_t  rcc;
+    uint8_t         irq;
+    uint8_t         secondIrq;
+} timerDef_t;
+// TCH hardware definition (listed in target.c)
+typedef struct timerHardware_s {
+    TIM_TypeDef *tim;
+    ioTag_t tag;
+    uint8_t channelIndex;
+    uint8_t output;
+    ioConfig_t ioMode;
+    uint8_t alternateFunction;
+    uint32_t usageFlags;
+    dmaTag_t dmaTag;
+    uint32_t dmaMuxid; //DMAMUX ID
+} timerHardware_t;
+
 #else
 typedef TIM_TypeDef HAL_Timer_t;
 typedef struct timerDef_s {

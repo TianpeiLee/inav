@@ -387,12 +387,20 @@ serialPort_t *openSerialPort(
 #endif
 #ifdef USE_UART4
         case SERIAL_PORT_USART4:
+        #ifdef CH32H41x
+            serialPort = uartOpen(USART4, rxCallback, rxCallbackData, baudRate, mode, options);
+        #else
             serialPort = uartOpen(UART4, rxCallback, rxCallbackData, baudRate, mode, options);
+        #endif
             break;
 #endif
 #ifdef USE_UART5
         case SERIAL_PORT_USART5:
+        #ifdef CH32H41x
+            serialPort = uartOpen(USART5, rxCallback, rxCallbackData, baudRate, mode, options);
+        #else
             serialPort = uartOpen(UART5, rxCallback, rxCallbackData, baudRate, mode, options);
+        #endif
             break;
 #endif
 #ifdef USE_UART6
@@ -402,12 +410,20 @@ serialPort_t *openSerialPort(
 #endif
 #ifdef USE_UART7
         case SERIAL_PORT_USART7:
+        #ifdef CH32H41x
+            serialPort = uartOpen(USART7, rxCallback, rxCallbackData, baudRate, mode, options);
+        #else
             serialPort = uartOpen(UART7, rxCallback, rxCallbackData, baudRate, mode, options);
+        #endif
             break;
 #endif
 #ifdef USE_UART8
         case SERIAL_PORT_USART8:
+        #ifdef CH32H41x
+            serialPort = uartOpen(USART8, rxCallback, rxCallbackData, baudRate, mode, options);
+        #else
             serialPort = uartOpen(UART8, rxCallback, rxCallbackData, baudRate, mode, options);
+        #endif
             break;
 #endif
 #ifdef USE_SOFTSERIAL1

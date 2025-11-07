@@ -51,6 +51,110 @@ timeMs_t millis(void)
 
 static volatile int sysTickPending = 0;
 
+
+#if defined(CH32H41x)
+
+#define V5_V3_CLOCK_RATE  4
+
+uint32_t __get_MCYCLE(void)
+{
+    uint32_t result;
+
+    asm volatile ( "csrr %0," "mcycle" : "=r"(result) : );
+    return (result);
+}
+
+void __set_MCYCLE(uint32_t value)
+{
+    asm volatile ("csrw mcycle, %0" : : "r" (value) );
+}
+
+void __set_MCOUNT_INHIBIT(uint32_t value)
+{
+    asm volatile ("csrw mucounteren, %0" : : "r" (value) );
+}
+
+uint32_t __get_MCOUNT_INHIBIT(void)
+{
+    uint32_t result;
+    asm volatile ( "csrr %0," "mucounteren" : "=r"(result) : );
+    return (result);
+}  
+
+__FAST_INTERRUPT
+void SysTick1_Handler(void)
+{
+    ATOMIC_BLOCK(NVIC_PRIO_MAX) {
+        sysTickUptime++;
+        sysTickValStamp = SysTick1->CNT;
+        sysTickPending = 0;
+        SysTick0->ISR &= ~(1<<1);   //clear Systick1 int
+    }
+}
+
+uint32_t ticks(void)
+{
+    return __get_MCYCLE( );
+}
+
+
+void delayNanos(timeDelta_t ns)
+{
+    const uint32_t startTicks = ticks();
+    const uint32_t ticksToWait = (ns * usTicks * V5_V3_CLOCK_RATE) / 1000;
+    while (ticks() - startTicks <= ticksToWait);
+}
+
+timeUs_t microsISR(void)
+{
+    register uint32_t ms, pending, cycle_cnt;
+    ATOMIC_BLOCK(NVIC_PRIO_MAX) {
+        cycle_cnt = SysTick1->CNT;
+        
+        //H41x, Systick1 count flag at Systick0->ISR bit1
+         if (SysTick0->ISR & (1<<1)) {
+            // Update pending.
+            // Record it for multiple calls within the same rollover period
+            // (Will be cleared when serviced).
+            // Note that multiple rollovers are not considered.
+            sysTickPending = 1;
+            // Read VAL again to ensure the value is read after the rollover.
+            cycle_cnt = SysTick1->CNT;
+        }
+        ms = sysTickUptime;
+        pending = sysTickPending;
+    }
+
+    // XXX: Be careful to not trigger 64 bit division
+    const uint32_t partial = (usTicks * 1000U - cycle_cnt) / usTicks;
+    return ((timeUs_t)(ms + pending) * 1000LL) + ((timeUs_t)partial);
+}
+
+
+timeUs_t micros(void)
+{
+    register uint32_t ms, cycle_cnt;
+
+    // Call microsISR() in interrupt and elevated (non-zero) BASEPRI context
+
+#ifndef UNIT_TEST
+    if ((PFIC->GISR & 0xFF) || (__get_BASEPRI())) {
+        return microsISR();
+    }
+#endif
+
+    do {
+        ms = sysTickUptime;
+        cycle_cnt = SysTick1->CNT;
+    } while (ms != sysTickUptime || cycle_cnt > sysTickValStamp);
+
+    // XXX: Be careful to not trigger 64 bit division
+    const uint32_t partial = (usTicks * 1000U - cycle_cnt) / usTicks;
+    return ((timeUs_t)ms * 1000LL) + ((timeUs_t)partial);
+}
+
+#else
+
 void SysTick_Handler(void)
 {
     ATOMIC_BLOCK(NVIC_PRIO_MAX) {
@@ -133,6 +237,9 @@ timeUs_t micros(void)
     return ((timeUs_t)ms * 1000LL) + ((timeUs_t)partial);
 }
 
+#endif
+
+
 #if 1
 void delayMicroseconds(timeUs_t us)
 {
@@ -167,8 +274,14 @@ void delayMicroseconds(timeUs_t us)
 }
 #endif
 
+
+
+
 void delay(timeMs_t ms)
 {
     while (ms--)
         delayMicroseconds(1000);
 }
+
+
+

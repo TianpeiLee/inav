@@ -56,7 +56,7 @@ typedef struct i2cDevice_s {
     ioTag_t sda;
     rccPeriphTag_t rcc;
     I2CSpeed speed;
-#if defined(STM32F7) || defined(STM32H7) || defined(AT32F43x) 
+#if defined(STM32F7) || defined(STM32H7) || defined(AT32F43x) ||defined(CH32H41x) 
     uint8_t ev_irq;
     uint8_t er_irq;
     uint8_t af;

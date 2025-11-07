@@ -43,6 +43,15 @@ void cycleCounterInit(void)
 {
     extern uint32_t usTicks; // From drivers/time.h
 
+#ifdef CH32H41x
+     usTicks = HCLKClock / 1000000;
+
+    //only can operate under M mode
+    __set_MCOUNT_INHIBIT(0x5);  //disable mcycle
+    __set_MCYCLE(0);          
+    __set_MCOUNT_INHIBIT(0x0);  //enable mcycle
+
+#else
     #if defined(AT32F43x)
         //crm_clocks_freq_type clocks;
         //crm_clocks_freq_get(&clocks); 
@@ -73,16 +82,23 @@ void cycleCounterInit(void)
 
     DWT->CYCCNT = 0;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+#endif
 }
 
 static inline void systemDisableAllIRQs(void)
 {
     // We access CMSIS NVIC registers directly here
     for (int x = 0; x < 8; x++) {
+#ifdef CH32H41x
+        PFIC->IRER[x] = 0xFFFFFFFF;     //disable all interrupter  
+        PFIC->IPRR[x] = 0xFFFFFFFF;     //clear all pendiing
+#else        
         // Mask all IRQs controlled by a ICERx
         NVIC->ICER[x] = 0xFFFFFFFF;
         // Clear all pending IRQs controlled by a ICPRx
         NVIC->ICPR[x] = 0xFFFFFFFF;
+#endif
     }
 }
 
@@ -121,10 +137,26 @@ void checkForBootLoaderRequest(void)
     }
     persistentObjectWrite(PERSISTENT_OBJECT_RESET_REASON, RESET_NONE);
 
+#ifdef CH32H41x
+
+    RCC_ClearFlag( );
+    
+    FLASH_Unlock();
+
+    FLASH->BOOT_MODEKEYR = 0x45670123;
+    FLASH->BOOT_MODEKEYR = 0xCDEF89AB;
+
+    FLASH->STATR &= ~(1<<14);
+    FLASH->STATR |= (1<<14);  //switch to bootloader area (0x1FFF0000)
+
+    FLASH_Lock( );
+    NVIC_SystemReset( ); 
+
+#else    
     volatile isrVector_t *bootloaderVector = (isrVector_t *)systemBootloaderAddress();
     __set_MSP(bootloaderVector->stackEnd);
     bootloaderVector->resetHandler();
-
+#endif
 
     while (1);
 }

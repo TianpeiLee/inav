@@ -102,6 +102,9 @@ struct {
     // Winbond W25Q256
     // Datasheet: https://www.winbond.com/resource-files/w25q256jv%20spi%20revb%2009202016.pdf
     {0xEF4019, 512, 256},
+    // PUYA PY25Q128
+    // Datasheet: https://www.puyasemi.com/download_path/%E6%95%B0%E6%8D%AE%E6%89%8B%E5%86%8C/Flash%20%E8%8A%AF%E7%89%87/PY25F128HA_datasheet_V1.1.pdf
+    {0x852018, 256, 256},
     // Cypress S25FL064L
     // Datasheet: https://www.cypress.com/file/316661/download
     {0x016017, 128, 256},

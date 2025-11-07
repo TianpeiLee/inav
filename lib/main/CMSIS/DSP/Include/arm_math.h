@@ -319,8 +319,9 @@
   #include "core_cm7.h"
   #define ARM_MATH_DSP
 #elif defined (ARM_MATH_CM4)
-  #include "core_cm4.h"
-  #define ARM_MATH_DSP
+//   #include "core_cm4.h"
+#include "ch32_debug.h"
+//   #define ARM_MATH_DSP
 #elif defined (ARM_MATH_CM3)
   #include "core_cm3.h"
 #elif defined (ARM_MATH_CM0)
@@ -512,6 +513,7 @@ extern "C"
                                 (((int32_t)(v0) << 24) & (int32_t)0xFF000000)  )
 
 #endif
+
 
 
   /**
