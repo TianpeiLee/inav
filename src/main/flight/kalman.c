@@ -99,9 +99,13 @@ static void updateAxisVariance(kalman_t *kalmanState, float rate)
     kalmanState->axisMean = kalmanState->axisSumMean * kalmanState->inverseN;
     kalmanState->axisVar = kalmanState->axisSumVar * kalmanState->inverseN;
 
-#if !defined(SITL_BUILD) && !defined(CH32H41x)
+#if !defined(SITL_BUILD) 
     float squirt;
+    #ifdef CH32H41x
+    riscv_sqrt_f32(kalmanState->axisVar, &squirt);
+    #else
     arm_sqrt_f32(kalmanState->axisVar, &squirt);
+    #endif
 #else
     float squirt = sqrtf(kalmanState->axisVar);
 #endif

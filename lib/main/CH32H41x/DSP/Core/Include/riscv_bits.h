@@ -87,10 +87,13 @@
 #define UL(x)                   (_UL(x))
 #define ULL(x)                  (_ULL(x))
 
-#define STR(x)                  XSTR(x)
-#define XSTR(x)                 #x
-#define __STR(s)                #s
-#define STRINGIFY(s)            __STR(s)
+// #define STR(x)                  XSTR(x)
+// #define XSTR(x)                 #x
+// #define __STR(s)                #s
+// #define STRINGIFY(s)            __STR(s)
+
+#define STRINGIFY(s)            #s
+
 
 #ifdef __cplusplus
 }

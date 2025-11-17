@@ -7,7 +7,7 @@
     SRAM                                    0x2017FC00
     0x20100000 - 0x20110000    64KB reserve for V3F CODE
     0x20110000 - 0x20118000    32K reserve for V3F
-    0x20118000 - 0x2017FC00    479KB 
+    0x20118000 - 0x2017FC00    415KB 
     0x2017FC00 - 0x20180000    1KB  reserve for simulation persist area
     DTCM 
     0x200C0000 - 256KB         We only use 192KB, the rest is used to store code

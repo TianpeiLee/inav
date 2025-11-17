@@ -84,7 +84,7 @@ endfunction()
 
 set(ch32h41x_xEU6_COMPILE_DEFINITIONS
     CH32H415REU6
-    MCU_FLASH_SIZE=512    #可以减小编译大小
+    MCU_FLASH_SIZE=960    #可以减小编译大小
 )
 
 function(target_ch32h41x_xEU6 name)

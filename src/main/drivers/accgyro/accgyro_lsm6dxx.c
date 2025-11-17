@@ -182,29 +182,7 @@ static void lsm6dxxSpiAccInit(accDev_t *acc)
 static bool lsm6dxxAccRead(accDev_t *acc)
 {
     uint8_t data[6];
-    const bool ack = busReadBuf(acc->busDev, LSM6DXX_REG_OUTX_L_A, data, 6);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[0]);
-
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[1]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[2]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[3]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[4]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[5]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0x0D);
-
+    const bool ack = busReadBuf(acc->busDev, LSM6DXX_REG_OUTX_L_A, data, 6);   
     if (!ack) {
         return false;
     }
@@ -217,29 +195,7 @@ static bool lsm6dxxAccRead(accDev_t *acc)
 static bool lsm6dxxGyroRead(gyroDev_t *gyro)
 {
     uint8_t data[6];
-    const bool ack = busReadBuf(gyro->busDev, LSM6DXX_REG_OUTX_L_G, data, 6);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[0]);
-
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[1]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[2]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[3]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[4]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, data[5]);
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0x0D);
-    
+    const bool ack = busReadBuf(gyro->busDev, LSM6DXX_REG_OUTX_L_G, data, 6);    
     if (!ack) {
         return false;
     }
@@ -252,27 +208,15 @@ static bool lsm6dxxGyroRead(gyroDev_t *gyro)
 // Init Gyro first,then Acc
 bool lsm6dGyroDetect(gyroDev_t *gyro)
 {
-    
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET); 
-    USART_SendData(USART8, 0xD6);
-    
     gyro->busDev = busDeviceInit(BUSTYPE_SPI, DEVHW_LSM6D, gyro->imuSensorToUse, OWNER_MPU);
     if (gyro->busDev == NULL) {
-               
-        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-        USART_SendData(USART8, 0xD7);
         return false;
     }
 
     if (!lsm6dxxDetect(gyro->busDev)) {
-               while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-        USART_SendData(USART8, 0xD8);
         busDeviceDeInit(gyro->busDev);
         return false;
     }
-       while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-        USART_SendData(USART8, 0xD9);
-
     lsm6DContextData_t * ctx = busDeviceGetScratchpadMemory(gyro->busDev);
     ctx->chipMagicNumber = 0xD6;
 

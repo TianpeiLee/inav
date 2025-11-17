@@ -502,11 +502,17 @@ static void performAcclerationCalibration(void)
 static void applyAccelerationZero(void)
 {
     float tmp[XYZ_AXIS_COUNT];
-
+#ifdef USE_RISCV_MATH
+    //Apply zero
+    riscv_sub_f32(accADC, fAccZero, tmp, XYZ_AXIS_COUNT);
+    //Apply gain
+    riscv_mult_f32(tmp, fAccGain, accADC, XYZ_AXIS_COUNT);
+#else
     //Apply zero
     arm_sub_f32(accADC, fAccZero, tmp, XYZ_AXIS_COUNT);
     //Apply gain
     arm_mult_f32(tmp, fAccGain, accADC, XYZ_AXIS_COUNT);
+#endif
 }
 
 /*
@@ -514,7 +520,11 @@ static void applyAccelerationZero(void)
  */
 void accGetMeasuredAcceleration(fpVector3_t *measuredAcc)
 {
-    arm_scale_f32(acc.accADCf, GRAVITY_CMSS, measuredAcc->v, XYZ_AXIS_COUNT);
+    #ifdef USE_RISCV_MATH
+        riscv_scale_f32(acc.accADCf, GRAVITY_CMSS, measuredAcc->v, XYZ_AXIS_COUNT);
+    #else
+        arm_scale_f32(acc.accADCf, GRAVITY_CMSS, measuredAcc->v, XYZ_AXIS_COUNT);
+    #endif
 }
 
 /*

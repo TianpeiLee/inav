@@ -129,7 +129,7 @@ set(CH32_LINK_OPTIONS
     --specs=nosys.specs
     -Wl,--print-memory-usage
     -Wl,-L${CH32_LINKER_DIR}
-#    -Wl,--cref
+    -Wl,--cref
 #    -Wl,-L${CH32_LINKER_DIR_SELF}    
 #    -Wl,--no-wchar-size-warning
 #    -Wl,--no-warn-rwx-segments

@@ -201,7 +201,7 @@ static void adcInstanceInit(ADCDevice adcDevice)
     ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
     ADC_InitStructure.ADC_ContinuousConvMode       = ENABLE;
     // ADC_InitStructure.ADC_Resolution               = ADC_Resolution_12b;
-    ADC_InitStructure.ADC_ExternalTrigConv         = ADC_ExternalTrigConv_T1_CC1;
+    ADC_InitStructure.ADC_ExternalTrigConv         = ADC_ExternalTrigConv_None;
     ADC_InitStructure.ADC_DataAlign                = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_NbrOfChannel             = adc->usedChannelCount;
     ADC_InitStructure.ADC_ScanConvMode             = adc->usedChannelCount > 1 ? ENABLE : DISABLE; // 1=scan more that one channel in group

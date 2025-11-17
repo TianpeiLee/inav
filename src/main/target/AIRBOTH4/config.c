@@ -34,23 +34,15 @@
 #include "drivers/pinio.h"
 #include "drivers/sensor.h"
 
-
-
-// BUSDEV_REGISTER_SPI_TAG(busdev_icm42605,   DEVHW_ICM42605,  ICM42605_SPI_BUS,   ICM42605_CS_PIN,   NONE, 0,  DEVFLAGS_NONE,  IMU_ICM42605_ALIGN);
-// BUSDEV_REGISTER_SPI_TAG(busdev_lsm6dxx,    DEVHW_LSM6D,     LSM6DXX_SPI_BUS,    LSM6DXX_CS_PIN,    NONE, 0,  DEVFLAGS_NONE,  IMU_LSM6DXX_ALIGN);
-
-
 void targetConfiguration(void)
 {
     // pinioBoxConfigMutable()->permanentId[0] = BOX_PERMANENT_ID_USER1;
     // pinioBoxConfigMutable()->permanentId[1] = BOX_PERMANENT_ID_USER2;
     // pinioBoxConfigMutable()->permanentId[2] = BOX_PERMANENT_ID_USER3;
-   // beeperConfigMutable()->pwmMode = true;
-    // serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART5)].functionMask = FUNCTION_MSP;
-    // serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART5)].msp_baudrateIndex = BAUD_115200;
-    // serialConfigMutable()->portConfigs[4].functionMask = FUNCTION_VTX_TRAMP;
-    //     serialConfigMutable()->portConfigs[4].peripheral_baudrateIndex = BAUD_115200;
-    // serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART2)].functionMask = FUNCTION_RX_SERIAL;
-    // serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART3)].functionMask = FUNCTION_ESCSERIAL;
-    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART1)].functionMask = FUNCTION_MSP|FUNCTION_LOG;
+   // beeperConfigMutable()->pwmMode = true;    
+    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART3)].functionMask = FUNCTION_MSP;      //BT
+    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART3)].msp_baudrateIndex = BAUD_115200;
+    
+    serialConfigMutable()->portConfigs[findSerialPortIndexByIdentifier(SERIAL_PORT_USART8)].functionMask = FUNCTION_GPS;
+    
 }

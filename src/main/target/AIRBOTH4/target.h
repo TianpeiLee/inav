@@ -21,6 +21,7 @@
 #define USBD_PRODUCT_STRING     "WCH CH32H41x"
 
 #undef USE_LOG
+
 #define LED0                    PC4
 
 #define BEEPER                  PF4
@@ -109,12 +110,14 @@
 
 //-------------------UART---------------------
 #define USE_VCP
+// #undef USE_USB_MSC      //调试时候禁用USB
+// #undef USE_TEMPERATURE_SENSOR
 
 // #define USE_LOG
 // #define VBUS_SENSING_PIN        PC2
 // #define VBUS_SENSING_ENABLED
 
-// #define USE_UART_INVERTER
+// #define USE_UART_INVERTER //无此功能
 
 #define USE_UART1
 #define UART1_RX_PIN            PA10
@@ -153,12 +156,17 @@
 #define SERIAL_PORT_COUNT       9 //VCP, USART1-8
 
 
+#define DEFAULT_RX_TYPE         RX_TYPE_SERIAL
+#define SERIALRX_PROVIDER       SERIALRX_CRSF
+#define SERIALRX_UART           SERIAL_PORT_USART1
 
 
-
+// #define USE_RANGEFINDER
+// #define RANGEFINDER_I2C_BUS     BUS_I2C2
 #define USE_RANGEFINDER
-#define RANGEFINDER_I2C_BUS     BUS_I2C2
-
+#define USE_RANGEFINDER_MSP
+#define USE_OPFLOW
+#define USE_OPFLOW_MSP
 
 
 //-----------------ADC--------------------
@@ -168,6 +176,9 @@
 
 #define CURRENT_METER_ADC_CHANNEL       ADC_CHN_1
 #define VBAT_ADC_CHANNEL                ADC_CHN_2
+
+#define ADC_CHANNEL_1_INSTANCE          ADC1
+#define ADC_CHANNEL_2_INSTANCE          ADC1
 
 
 #define SENSORS_SET (SENSOR_ACC|SENSOR_MAG|SENSOR_BARO)
@@ -179,15 +190,16 @@
 
 #define DEFAULT_RX_TYPE         RX_TYPE_SERIAL
 #define DISABLE_RX_PWM_FEATURE
-#define DEFAULT_FEATURES        (FEATURE_TX_PROF_SEL | FEATURE_BLACKBOX | FEATURE_VBAT)
+#define DEFAULT_FEATURES        (FEATURE_TX_PROF_SEL | FEATURE_BLACKBOX | FEATURE_VBAT|FEATURE_CURRENT_METER|FEATURE_OSD)
+#define CURRENT_METER_SCALE     250
 
-#define USE_SPEKTRUM_BIND
-#define BIND_PIN                PA3 // USART3 RX
+// #define USE_SPEKTRUM_BIND
+// #define BIND_PIN                PA3 // USART3 RX
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
 
 // Number of available PWM outputs
-#define MAX_PWM_OUTPUT_PORTS    4
+#define MAX_PWM_OUTPUT_PORTS    5
 #define TARGET_MOTOR_COUNT      4
 
 #define TARGET_IO_PORTA         0xffff
@@ -199,3 +211,5 @@
 
 #define USE_DSHOT
 #define USE_ESC_SENSOR
+
+

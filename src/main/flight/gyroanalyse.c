@@ -268,7 +268,11 @@ static NOINLINE void gyroDataAnalyseUpdate(gyroAnalyseState_t *state)
             
             // apply hanning window to gyro samples and store result in fftData
             // hanning starts and ends with 0, could be skipped for minor speed improvement
+            #ifdef USE_RISCV_MATH
+            riscv_mult_f32(state->downsampledGyroData[state->updateAxis], state->hanningWindow, state->fftData, FFT_WINDOW_SIZE);
+            #else
             arm_mult_f32(state->downsampledGyroData[state->updateAxis], state->hanningWindow, state->fftData, FFT_WINDOW_SIZE);
+            #endif
         }
     }
 

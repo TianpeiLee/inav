@@ -575,8 +575,11 @@ typedef struct blackboxSlowState_s {
 #endif
     uint16_t rxUpdateRate;
     uint8_t activeWpNumber;
+#ifdef CH32H41x
+} blackboxSlowState_t; 
+#else
 } __attribute__((__packed__)) blackboxSlowState_t; // We pack this struct so that padding doesn't interfere with memcmp()
-
+#endif
 //From rc_controls.c
 extern boxBitmask_t rcModeActivationMask;
 

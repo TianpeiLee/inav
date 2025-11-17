@@ -26,6 +26,7 @@
 #include "fc/fc_init.h"
 
 #include "flight/mixer.h"
+#include "ch32_debug.h"
 
 #ifdef DEBUG_HARDFAULTS
 
@@ -95,6 +96,41 @@ __FAST_INTERRUPT
 #endif
 void HardFault_Handler(void)
 {
+
+    uint32_t mepc = __get_MEPC();
+    uint32_t mcause = __get_MCAUSE();
+    uint32_t mtval = __get_MTVAL();
+/*
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, 0xBE);
+
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mepc>>24)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mepc>>16)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mepc>>8)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mepc>>0)&0xFF);
+
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mcause>>24)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mcause>>16)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mcause>>8)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mcause>>0)&0xFF);
+
+        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mtval>>24)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mtval>>16)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mtval>>8)&0xFF);
+    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
+    USART_SendData(USART8, (mtval>>0)&0xFF);
+*/
     LED2_ON;
 
     // fall out of the sky

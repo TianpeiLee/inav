@@ -815,10 +815,10 @@ static void imuCalculateEstimatedAttitude(float dT)
     }
     compansatedGravityBF = imuMeasuredAccelBF
 #endif
+
     float accWeight = imuGetPGainScaleFactor() * imuCalculateAccelerometerWeightNearness(&compansatedGravityBF);
     accWeight = accWeight * imuCalculateAccelerometerWeightRateIgnore(acc_ignore_slope_multipiler);
     const bool useAcc = (accWeight > 0.001f);
-
     const float magWeight = imuGetPGainScaleFactor() * 1.0f;
     fpVector3_t measuredMagBF = {.v = {mag.magADC[X], mag.magADC[Y], mag.magADC[Z]}};
     imuMahonyAHRSupdate(dT, &imuMeasuredRotationBF,
@@ -857,6 +857,7 @@ void imuUpdateAttitude(timeUs_t currentTimeUs)
 {
     /* Calculate dT */
     static timeUs_t previousIMUUpdateTimeUs;
+
     const float dT = (currentTimeUs - previousIMUUpdateTimeUs) * 1e-6;
     previousIMUUpdateTimeUs = currentTimeUs;
 

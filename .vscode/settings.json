@@ -59,7 +59,9 @@
         "pinio.h": "c",
         "serial.h": "c",
         "sensor.h": "c",
-        "accgyro_lsm6dxx.h": "c"
+        "accgyro_lsm6dxx.h": "c",
+        "complex": "c",
+        "random": "c"
     },
     "editor.tabSize": 4,
     "editor.insertSpaces": true,

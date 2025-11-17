@@ -142,10 +142,6 @@ PG_RESET_TEMPLATE(gyroConfig_t, gyroConfig,
 STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev, gyroSensor_e gyroHardware)
 {
     dev->gyroAlign = ALIGN_DEFAULT;
-
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0xC0);
-
     switch (gyroHardware) {
     case GYRO_AUTODETECT:
         FALLTHROUGH;
@@ -206,8 +202,6 @@ STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev, gyroSensor_e gyroHard
 
 #ifdef USE_IMU_ICM42605
     case GYRO_ICM42605:
-        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-        USART_SendData(USART8, 0xC1);
         if (icm42605GyroDetect(dev)) {
             gyroHardware = GYRO_ICM42605;
             break;
@@ -226,9 +220,6 @@ STATIC_UNIT_TESTED gyroSensor_e gyroDetect(gyroDev_t *dev, gyroSensor_e gyroHard
 
 #ifdef USE_IMU_LSM6DXX
     case GYRO_LSM6DXX:
-        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-        USART_SendData(USART8, 0xC2);
-
         if (lsm6dGyroDetect(dev)) {
             gyroHardware = GYRO_LSM6DXX;
             break;
@@ -300,11 +291,7 @@ static void gyroInitFilters(void)
 
 bool gyroInit(void)
 {
-    memset(&gyro, 0, sizeof(gyro));
-
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0xB0);
-    
+    memset(&gyro, 0, sizeof(gyro));    
     // Set inertial sensor tag (for dual-gyro selection)
 #ifdef USE_DUAL_GYRO
     gyroDev[0].imuSensorToUse = gyroConfig()->gyro_to_use;
@@ -319,8 +306,6 @@ bool gyroInit(void)
         detectedSensors[SENSOR_INDEX_GYRO] = GYRO_NONE;
         return true;
     }
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0xB1);
     // Gyro is initialized
     gyro.initialized = true;
     detectedSensors[SENSOR_INDEX_GYRO] = gyroHardware;
@@ -428,7 +413,6 @@ static bool FAST_CODE NOINLINE gyroUpdateAndCalibrate(gyroDev_t * gyroDev, zeroC
 
     // range: +/- 8192; +/- 2000 deg/sec
     if (gyroDev->readFn(gyroDev)) {
-
 #ifndef USE_IMU_FAKE // fixes Test Unit compilation error
     if (!gyroConfig()->init_gyro_cal_enabled) {
         // marks that the gyro calibration has ended
@@ -442,17 +426,23 @@ static bool FAST_CODE NOINLINE gyroUpdateAndCalibrate(gyroDev_t * gyroDev, zeroC
 
         if (zeroCalibrationIsCompleteV(gyroCal)) {
             float gyroADCtmp[XYZ_AXIS_COUNT];
-
+#ifdef USE_RISCV_MATH
+            //Apply zero calibration with CMSIS DSP
+            riscv_sub_f32(gyroDev->gyroADCRaw, gyroDev->gyroZero, gyroADCtmp, 3);
+#else
             //Apply zero calibration with CMSIS DSP
             arm_sub_f32(gyroDev->gyroADCRaw, gyroDev->gyroZero, gyroADCtmp, 3);
-
+#endif
             // Apply sensor alignment
             applySensorAlignment(gyroADCtmp, gyroADCtmp, gyroDev->gyroAlign);
             applyBoardAlignment(gyroADCtmp);
-
+#ifdef USE_RISCV_MATH
+            // Convert to deg/s and store in unified data
+            riscv_scale_f32(gyroADCtmp, gyroDev->scale, gyroADCf, 3);
+#else
             // Convert to deg/s and store in unified data
             arm_scale_f32(gyroADCtmp, gyroDev->scale, gyroADCf, 3);
-
+#endif
             return true;
         } else {
             performGyroCalibration(gyroDev, gyroCal);
@@ -461,7 +451,6 @@ static bool FAST_CODE NOINLINE gyroUpdateAndCalibrate(gyroDev_t * gyroDev, zeroC
             gyroADCf[X] = 0.0f;
             gyroADCf[Y] = 0.0f;
             gyroADCf[Z] = 0.0f;
-
             return false;
         }
     } else {
@@ -475,7 +464,6 @@ void FAST_CODE NOINLINE gyroFilter(void)
     if (!gyro.initialized) {
         return;
     }
-
     for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
         float gyroADCf = gyro.gyroADCf[axis];
 
@@ -488,24 +476,26 @@ void FAST_CODE NOINLINE gyroFilter(void)
         float preLulu = gyroADCf;
         gyroADCf = gyroLuluApplyFn((filter_t *) &gyroLuluState[axis], gyroADCf);
         DEBUG_SET(DEBUG_LULU, axis + 3, gyroADCf); //Post LULU debug
-
+       
         if (axis == ROLL) {
             DEBUG_SET(DEBUG_LULU, 6, gyroADCf - preLulu); //LULU delta debug
         }
 
         // Gyro Main LPF
         gyroADCf = gyroLpf2ApplyFn((filter_t *) &gyroLpf2State[axis], gyroADCf);
+       
 
 #ifdef USE_ADAPTIVE_FILTER
         adaptiveFilterPush(axis, gyroADCf);
 #endif
-
+        
 #ifdef USE_DYNAMIC_FILTERS
         if (dynamicGyroNotchState.enabled) {
             gyroDataAnalysePush(&gyroAnalyseState, axis, gyroADCf);
             gyroADCf = dynamicGyroNotchFiltersApply(&dynamicGyroNotchState, axis, gyroADCf);
         }
 
+        
         /**
          * Secondary dynamic notch filter. 
          * In some cases, noise amplitude is high enough not to be filtered by the primary filter.
@@ -513,17 +503,16 @@ void FAST_CODE NOINLINE gyroFilter(void)
          */
         gyroADCf = secondaryDynamicGyroNotchFiltersApply(&secondaryDynamicGyroNotchState, axis, gyroADCf);
 
+       
 #endif
-
+    
 #ifdef USE_GYRO_KALMAN
         if (gyroConfig()->kalmanEnabled) {
             gyroADCf = gyroKalmanUpdate(axis, gyroADCf);
         }
 #endif
-
         gyro.gyroADCf[axis] = gyroADCf;
     }
-
 #ifdef USE_DYNAMIC_FILTERS
     if (dynamicGyroNotchState.enabled) {
         gyroDataAnalyse(&gyroAnalyseState);
@@ -544,7 +533,6 @@ void FAST_CODE NOINLINE gyroFilter(void)
         }
     }
 #endif
-
 }
 
 void FAST_CODE NOINLINE gyroUpdate(void)

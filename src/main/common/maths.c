@@ -554,8 +554,10 @@ float attenuation(const float input, const float width) {
 
 float fast_fsqrtf(const float value) {
     float ret = 0.0f;
-#ifdef USE_ARM_MATH
+#if defined(USE_ARM_MATH) 
     arm_sqrt_f32(value, &ret);
+#elif defined(USE_RISCV_MATH)
+    riscv_sqrt_f32(value, &ret);
 #else
     ret = sqrtf(value);
 #endif
@@ -578,7 +580,7 @@ float NOINLINE calc_length_pythagorean_3D(const float firstElement, const float 
     return fast_fsqrtf(sq(firstElement) + sq(secondElement) + sq(thirdElement));
 }
 
-#if defined(SITL_BUILD) || defined(CH32H41x)
+#if defined(SITL_BUILD) 
 
 /**
  * @brief Floating-point vector subtraction, equivalent of CMSIS arm_sub_f32.

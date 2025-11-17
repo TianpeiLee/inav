@@ -50,13 +50,13 @@ SECTIONS
         *(.tcm_code)
         *(.tcm_code*)
 		/* Prioritize placing code in ITCM area */
+        CMakeFiles/AIRBOTH4.elf.dir/__/__/build/*.obj(.text .text.*)  
+           
         CMakeFiles/AIRBOTH4.elf.dir/__/__/drivers/*.obj(.text .text.*)
         CMakeFiles/AIRBOTH4.elf.dir/__/__/navigation/*.obj(.text .text.*)
-        CMakeFiles/AIRBOTH4.elf.dir/__/__/fc/*.obj(.text .text.*)
+        CMakeFiles/AIRBOTH4.elf.dir/__/__/fc/*.obj(.text .text.*) 
         CMakeFiles/AIRBOTH4.elf.dir/__/__/flight/*.obj(.text .text.*)
     
-
-
         . = ALIGN(4);
         tcm_code_end = .;
     } >ITCM AT >MOVABLE_FLASH
@@ -70,6 +70,10 @@ SECTIONS
         *(.ram_code*)
         *(.text)
         *(.text.*)
+    /*
+        *(.rodata)
+		*(.rodata*)
+      */  
         . = ALIGN(4);
         ram_code_end = .;
     } >SRAM AT >MOVABLE_FLASH
@@ -81,8 +85,10 @@ SECTIONS
 		*(.text)
 		*(.text.*)
 */
+
 		*(.rodata)
 		*(.rodata*)
+        
 		*(.gnu.linkonce.t.*)
 		. = ALIGN(4);
 	} >FLASH1 AT>MOVABLE_FLASH 
@@ -96,6 +102,25 @@ SECTIONS
     . = ALIGN(4);
     PROVIDE_HIDDEN (__busdev_registry_end = .);
   } >MOVABLE_FLASH
+
+  .pg_registry :
+  {
+	. = ALIGN(4);
+    PROVIDE_HIDDEN (__pg_registry_start = .);
+    KEEP (*(.pg_registry))
+    KEEP (*(SORT(.pg_registry.*)))
+	. = ALIGN(4);
+    PROVIDE_HIDDEN (__pg_registry_end = .);
+  } >MOVABLE_FLASH
+  .pg_resetdata :
+  {
+	. = ALIGN(4);
+    PROVIDE_HIDDEN (__pg_resetdata_start = .);
+    KEEP (*(.pg_resetdata))
+	. = ALIGN(4);
+    PROVIDE_HIDDEN (__pg_resetdata_end = .);
+  } >MOVABLE_FLASH
+
 
 	.fini :
 	{
@@ -126,23 +151,6 @@ SECTIONS
 	  PROVIDE_HIDDEN (__fini_array_end = .);
 	} >FLASH1 AT>MOVABLE_FLASH 
 	
-  .pg_registry :
-  {
-	. = ALIGN(4);
-    PROVIDE_HIDDEN (__pg_registry_start = .);
-    KEEP (*(.pg_registry))
-    KEEP (*(SORT(.pg_registry.*)))
-	. = ALIGN(4);
-    PROVIDE_HIDDEN (__pg_registry_end = .);
-  } >MOVABLE_FLASH
-  .pg_resetdata :
-  {
-	. = ALIGN(4);
-    PROVIDE_HIDDEN (__pg_resetdata_start = .);
-    KEEP (*(.pg_resetdata))
-	. = ALIGN(4);
-    PROVIDE_HIDDEN (__pg_resetdata_end = .);
-  } >MOVABLE_FLASH
 
 	.ctors          :
 	{

@@ -213,9 +213,6 @@ void init(void)
     __enable_irq();
 #endif
 
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0xA0);
-
     // initialize IO (needed for all IO operations)
     IOInitGlobal();
 
@@ -530,11 +527,7 @@ void init(void)
 #ifndef USE_GEOZONE
     featureClear(FEATURE_GEOZONE);
 #endif
-    while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-    USART_SendData(USART8, 0xA1);
     if (!sensorsAutodetect()) {
-        while(USART_GetFlagStatus(USART8, USART_FLAG_TC) == RESET);
-        USART_SendData(USART8, 0xA2);
         // if gyro was not detected due to whatever reason, we give up now.
         failureMode(FAILURE_MISSING_ACC);
     }
